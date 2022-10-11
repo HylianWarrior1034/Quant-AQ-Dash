@@ -1,0 +1,96 @@
+body {
+  background: rgba(128, 90, 70, 0.1725490196);
+  overflow: hidden;
+}
+
+.header {
+  color: rgba(15, 15, 15, 0.631372549);
+  padding: 0 10px;
+  text-align: center;
+  font-size: max(2vw, 24px);
+  margin: 5vh 0;
+}
+
+.footer {
+  color: rgba(15, 15, 15, 0.631372549);
+  padding: 0 10px;
+  text-align: center;
+  font-size: min(1vw, 20px);
+  margin: 4vh 0;
+}
+
+.mainframe {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+}
+.mainframe .left {
+  left: 0;
+  width: 70%;
+  margin-left: 20px;
+}
+.mainframe .left .radios {
+  display: flex;
+  flex-direction: rows;
+  justify-content: space-between;
+}
+.mainframe .left .graph {
+  padding-top: 10px;
+  height: 65vh;
+  box-shadow: 8px 18px 10px 3px rgba(0, 0, 0, 0.2);
+}
+.mainframe .right {
+  left: 72%;
+  top: 10vw;
+  width: 28%;
+  display: flex;
+  flex-direction: column;
+}
+.mainframe .right .daterange {
+  position: relative;
+  text-align: center;
+  height: 75%;
+  width: 80%;
+  transform: translateX(10%);
+}
+.mainframe .right .downloader {
+  position: relative;
+  height: 25%;
+  font-size: min(24px, 1vw);
+  text-align: center;
+  transform: translateY(80px);
+  /* Buttons */
+  /* Default Button */
+}
+.mainframe .right .downloader .downloader_btn {
+  width: 75%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.15em;
+  display: inline-block;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0.75em 1em;
+  text-decoration: none;
+  cursor: pointer;
+  text-decoration: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  text-transform: uppercase;
+  text-align: center;
+  border-radius: 5px;
+}
+.mainframe .right .downloader .downloader_btn, .mainframe .right .downloader .downloader_btn:link, .mainframe .right .downloader .downloader_btn:visited {
+  color: #fff;
+  background-color: #805A46;
+  margin-bottom: 1.5em;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s;
+}
+.mainframe .right .downloader .downloader_btn:hover, .mainframe .right .downloader .downloader_btn:focus {
+  text-decoration: none;
+  background-color: rgba(128, 90, 70, 0.662745098);
+}
+.mainframe .right .downloader .downloader:active {
+  background-color: #805A46;
+}/*# sourceMappingURL=style.css.map */

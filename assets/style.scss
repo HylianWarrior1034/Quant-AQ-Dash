@@ -1,0 +1,112 @@
+$background: #805a462c;
+$letter: #D9C3A9;
+
+body{
+    background: $background;
+    overflow: hidden;
+}
+
+.header{
+    color: #0f0f0fa1;
+    padding: 0 10px; 
+    text-align: center;
+    font-size: max(2vw, 24px);
+    margin: 5vh 0;
+}
+
+.footer{
+    color: #0f0f0fa1;
+    padding: 0 10px; 
+    text-align: center;
+    font-size: min(1vw, 20px);
+    margin: 4vh 0;
+}
+
+.mainframe{
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+
+    .left{
+        left: 0;
+        width: 70%;
+        margin-left: 20px;
+
+        .radios{
+            display: flex;
+            flex-direction: rows;
+            justify-content: space-between;
+        }
+
+        .graph{
+            padding-top: 10px;
+            height: 65vh;
+            box-shadow: 8px 18px 10px 3px rgb(0 0 0 / 20%);
+        }
+    }
+
+    .right{
+        left: 72%;
+        top: 10vw;
+        width: 28%; 
+        display: flex;
+        flex-direction: column;
+        // justify-content: space-evenly;
+        // margin-left: 20px;
+
+        .daterange{
+            position: relative;
+            text-align: center;
+            height: 75%; 
+            width: 80%;
+            transform: translateX(10%);
+        }
+
+
+        .downloader{
+            position: relative;
+            height: 25%;
+            font-size: min(24px, 1vw);
+            text-align: center;
+            transform: translateY(80px);
+
+            /* Buttons */
+            /* Default Button */
+            .downloader_btn {
+                width: 75%;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                letter-spacing: .15em;
+                display: inline-block;
+                font-weight: bold;
+                line-height: 1;
+                padding: 0.75em 1em;
+                text-decoration: none;
+                cursor: pointer;
+                text-decoration: none;
+                -ms-touch-action: manipulation;
+                touch-action: manipulation;
+                white-space: nowrap;
+                text-transform: uppercase;
+                text-align: center;
+                border-radius: 5px;
+            }
+
+            .downloader_btn, .downloader_btn:link, .downloader_btn:visited {
+                color: #fff;
+                background-color: #805A46;
+                margin-bottom: 1.5em;
+                -webkit-tap-highlight-color: transparent;
+                -webkit-transition: background-color .3s;
+                transition: background-color .3s;
+            }
+            .downloader_btn:hover, .downloader_btn:focus {
+                text-decoration: none;
+                background-color: #805a46a9;
+            }
+            .downloader:active {
+                background-color: #805A46;
+            }
+        }
+    }
+}
