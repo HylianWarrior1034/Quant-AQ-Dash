@@ -31,7 +31,8 @@ app._favicon = (r"quantaq.ico")
 # cache.init_app(app.server, config=CACHE_CONFIG)
 
 ### import df ###
-df = pd.read_csv("Quant-aq_2022.csv")
+url = "https://media.githubusercontent.com/media/HylianWarrior1034/Quant-AQ-Dash/main/Quant-aq_2022.csv"
+df = pd.read_csv(url)
 # df = df[['timestamp', 'module', 'pm1', 'pm25', 'pm10']]
 
 # groupby each hour 
@@ -57,13 +58,19 @@ df = pd.read_csv("Quant-aq_2022.csv")
 
 app.layout = \
 html.Div([
-    html.Div(className = 'header', children='Sensor Data for 2022'),
+    html.Div([
+        html.Div([
+            dcc.Dropdown(['PM Data', 'Wind Data'], 'PM Data', id = 'crossfilter-graph-type', multi = False)
+        ], className = 'graph-type'),
+
+        html.Div(className = 'header', children='Sensor Data for 2022')
+    ], className = 'top'),
 
     html.Div([
         html.Div([
             html.Div([
                 dcc.Dropdown(df['module'].unique(), ['MOD-00021'], id='crossfilter-graph-module', multi = True)
-            ], className = 'graph-type'),
+            ], className = 'pm-type'),
 
             html.Div([
                 html.Div([
