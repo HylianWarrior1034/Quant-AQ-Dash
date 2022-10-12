@@ -3,12 +3,22 @@ body {
   overflow: hidden;
 }
 
-.header {
+.top {
+  width: 90%;
+  left: 10%;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  align-items: center;
+  margin: 5vh 20px;
+}
+.top .header {
+  z-index: -1;
+  position: absolute;
   color: rgba(15, 15, 15, 0.631372549);
   padding: 0 10px;
   text-align: center;
   font-size: max(2vw, 24px);
-  margin: 5vh 0;
+  width: 100vw;
 }
 
 .footer {

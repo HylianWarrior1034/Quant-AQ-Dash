@@ -6,12 +6,23 @@ body{
     overflow: hidden;
 }
 
-.header{
-    color: #0f0f0fa1;
-    padding: 0 10px; 
-    text-align: center;
-    font-size: max(2vw, 24px);
-    margin: 5vh 0;
+.top{
+    width: 90%;
+    left: 10%;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-items: center;
+    margin: 5vh 20px;
+
+    .header{
+        z-index: -1;
+        position: absolute;
+        color: #0f0f0fa1;
+        padding: 0 10px; 
+        text-align: center;
+        font-size: max(2vw, 24px);
+        width: 100vw;
+    }
 }
 
 .footer{
