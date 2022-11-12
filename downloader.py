@@ -4,6 +4,7 @@ import pandas as pd
 import math
 import matplotlib.pyplot as plt
 import numpy as np 
+import os
 from tkinter import *
 
 client = quantaq.QuantAQAPIClient('7NVIKOGY0DGZBPWJ2YJJ2KR9')
@@ -51,6 +52,7 @@ def download_data(start_day, end_day, dev):
     rh = []
     no2 = [] 
     timestamp = []
+    timestamp_local = []
 
     if dev in ['MOD-00021', 'MOD-00022', 'MOD-00047', 'MOD-00048', 'MOD-00049', 'MOD-00050', 'MOD-00051', \
         'MOD-00052', 'MOD-00053', 'MOD-00054']:
@@ -68,10 +70,12 @@ def download_data(start_day, end_day, dev):
                 winddir.append(entry['met']['wd'])
                 windspeed.append(entry['met']['ws'])     
                 timestamp.append(entry['timestamp'][:-3])
+                timestamp_local.append(entry['timestamp_local'][:-3])
 
         # create a pandas dataframe from the lists 
         df = pd.DataFrame({
             'timestamp' : timestamp,
+            'timestamp_local' : timestamp_local,
             'pm1': pm1,
             'pm10': pm10,
             'pm25': pm25,
@@ -91,14 +95,18 @@ def download_data(start_day, end_day, dev):
                 pm10.append(entry['pm10'])
                 pm25.append(entry['pm25']) 
                 timestamp.append(entry['timestamp'][:-3])
+                timestamp_local.append(entry['timestamp_local'][:-3])
 
         # create a pandas dataframe from the lists 
         df = pd.DataFrame({
             'timestamp' : timestamp,
+            'timestamp_local' : timestamp_local,
             'pm1': pm1,
             'pm10': pm10,
             'pm25': pm25,
         }, index = range(len(timestamp)))
+
+    df = df.sort_values(by = ['timestamp_local'])
 
     return df
 
@@ -117,11 +125,22 @@ def download_csv(start_month, end_month, directory, devs):
             
             month_df.to_csv(f'{directory}/{dev}/Quant-aq_{dev}_{str(monthly[i].date())[5:7]}.csv'.format(directory, dev))
 
-        year_df = pd.read_csv(f'{directory}/{dev}/Quant-aq_{dev}_year.csv')
-        df = pd.concat([year_df, df])
-        df.to_csv(f'{directory}/{dev}/Quant-aq_{dev}_year.csv')
+        # year_df = pd.read_csv(f'{directory}/{dev}/Quant-aq_{dev}_year.csv')
+        # df = pd.concat([year_df, df])
+        # df.to_csv(f'{directory}/{dev}/Quant-aq_{dev}_year.csv')
 
-import os
+def make_yearcsv():
+    for directory in os.scandir(r"data"): 
+        dev = directory.path[5:]
+        df = pd.DataFrame()
+
+        for file in os.scandir(directory.path):
+            if "year" not in file.name:
+                df_sub = pd.read_csv(file.path)
+                df = pd.concat([df, df_sub])
+
+        df = df.iloc[:, 1:]
+        df.to_csv(f'{directory.path}/Quant-aq_{dev}_year.csv')
 
 # this bottom segment of code was used to concatenate all the sub-csv's into one gigantic one (that's 6 million lines long)
 
@@ -133,7 +152,7 @@ def concatenate():
         name = directory.path[5:]
         for file in os.scandir(directory.path): 
             if 'year' in file.path: 
-                df_sub = pd.read_csv(file.path).iloc[:, 1:]
+                df_sub = pd.read_csv(file.path)
                 # if 'MOD-00021' or 'MOD-00022' in file.path:
                 #     df_sub = df_sub[['timestamp', 'pm1', 'pm10', 'pm25']]
 
@@ -149,6 +168,9 @@ def concatenate():
     df = df.drop(["Unnamed: 0"], axis = 1)
 
     df.to_csv('Quant-aq_2022_test.csv')
+
+
+
 
 ###################################################################################
 
@@ -171,88 +193,94 @@ def concatenate():
        
 
 
-if __name__ == "__main__": 
-    download_csv(9, 10, r"C:\Users\Dm101\Desktop\plotly\data", [
-        "MOD-00021", 
-        "MOD-00022", 
-        "MOD-00047",
-        "MOD-00048",
-        "MOD-00049",
-        "MOD-00051",
-        "MOD-00052",
-        "MOD-00053",
-        "MOD-00054",
-        "MOD-PM-00194",
-        "MOD-PM-00195",
-        "MOD-PM-00196",
-        "MOD-PM-00197",
-        "MOD-PM-00270",
-        "MOD-PM-00273",
-        "MOD-PM-00274",
-        "MOD-PM-00275", 
-        "MOD-PM-00276", 
-        "MOD-PM-00277",
-        ])
-    concatenate()
+# if __name__ == "__main__": 
+    # download_csv(10, 11, r"C:\Users\Dm101\Desktop\plotly\data", [
+#         "MOD-00021", 
+#         "MOD-00022", 
+        # "MOD-00047",
+        # "MOD-00048",
+        # "MOD-00050",
+        # "MOD-00051",
+        # "MOD-00052",
+        # "MOD-00053",
+        # "MOD-00054",
+#         # "MOD-PM-00194",
+#         # "MOD-PM-00195",
+#         "MOD-PM-00196",
+#         "MOD-PM-00197",
+#         "MOD-PM-00270",
+#         "MOD-PM-00273",
+#         "MOD-PM-00274",
+#         "MOD-PM-00275", 
+#         "MOD-PM-00276", 
+#         "MOD-PM-00277",
+        # ])
+    # make_yearcsv()
+    # concatenate()
 
 
 # code block to add all the new shit 
 
-# start_day = '2022-09-14'
-# end_day = '2022-10-01'
+start_day = '2022-09-14'
+end_day = '2022-09-30'
 
-# devs = ['MOD-00047', 'MOD-00048', 'MOD-00050', 'MOD-00051', 'MOD-00052', 'MOD-00053', 'MOD-00054']
+devs = ['MOD-00047', 'MOD-00048', 'MOD-00050', 'MOD-00051', 'MOD-00052', 'MOD-00053', 'MOD-00054']
 
-# date_range = pd.date_range(start = start_day, end = end_day)
-# for dev in devs: 
-#     datas = []
-#     for i, day in enumerate(date_range):
-#         data = client.data.bydate(sn = dev, date = str(day.date()))
-#         datas.append(data)
-#         printProgressBar (i+1, len(date_range), prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r")
+date_range = pd.date_range(start = start_day, end = end_day)
+for dev in devs: 
+    datas = []
+    for i, day in enumerate(date_range):
+        data = client.data.bydate(sn = dev, date = str(day.date()))
+        datas.append(data)
+        printProgressBar (i+1, len(date_range), prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r")
 
-#     pm1 = []
-#     pm10 = []
-#     pm25 = []
-#     o3 = [] 
-#     winddir = []
-#     windspeed = [] 
-#     co = [] 
-#     temperature = []
-#     timestamp = []
-#     rh = []
-#     no2 = [] 
-#     timestamp = []
+    pm1 = []
+    pm10 = []
+    pm25 = []
+    o3 = [] 
+    winddir = []
+    windspeed = [] 
+    co = [] 
+    temperature = []
+    timestamp = []
+    rh = []
+    no2 = [] 
+    timestamp_local = []
 
-#     # append only the wanted data from the obtained quant-aq data
-#     for data in datas: 
-#         for entry in data: 
-#             pm1.append(entry['pm1'])
-#             pm10.append(entry['pm10'])
-#             pm25.append(entry['pm25'])
-#             o3.append(entry['o3'])
-#             no2.append(entry['no2'])
-#             co.append(entry['co'])
-#             temperature.append(entry['temp'])
-#             rh.append(entry['rh'])
-#             winddir.append(entry['met']['wd'])
-#             windspeed.append(entry['met']['ws'])   
-#             # The timestamp for the new sensors have an extra character at the end... don't ask me why this makes it really annoying  
-#             timestamp.append(entry['timestamp'][:-3])
+    # append only the wanted data from the obtained quant-aq data
+    for data in datas: 
+        for entry in data: 
+            pm1.append(entry['pm1'])
+            pm10.append(entry['pm10'])
+            pm25.append(entry['pm25'])
+            o3.append(entry['o3'])
+            no2.append(entry['no2'])
+            co.append(entry['co'])
+            temperature.append(entry['temp'])
+            rh.append(entry['rh'])
+            winddir.append(entry['met']['wd'])
+            windspeed.append(entry['met']['ws'])   
+            timestamp_local.append(entry['timestamp_local'][:-3])
+            # The timestamp for the new sensors have an extra character at the end... don't ask me why this makes it really annoying  
+            timestamp.append(entry['timestamp'][:-3])
 
-#     # create a pandas dataframe from the lists 
-#     df = pd.DataFrame({
-#         'timestamp' : timestamp,
-#         'pm1': pm1,
-#         'pm10': pm10,
-#         'pm25': pm25,
-#         'o3': o3,
-#         'no2': no2,
-#         'co': co, 
-#         'temperature': temperature,
-#         'rh': rh, 
-#         'wind direction': winddir,
-#         'wind speed': windspeed
-#     }, index = range(len(timestamp)))
+    # create a pandas dataframe from the lists 
+    df = pd.DataFrame({
+        'timestamp' : timestamp,
+        'timestamp_local': timestamp_local,
+        'pm1': pm1,
+        'pm10': pm10,
+        'pm25': pm25,
+        'o3': o3,
+        'no2': no2,
+        'co': co, 
+        'temperature': temperature,
+        'rh': rh, 
+        'wind direction': winddir,
+        'wind speed': windspeed
+    }, index = range(len(timestamp)))
+    df = df.sort_values(by = ['timestamp_local'])
+    df.to_csv(f"data/{dev}/Quant-aq_{dev}_09.csv")
 
-#     df.to_csv(f"data/{dev}/Quant-aq_{dev}_year.csv")
+make_yearcsv()
+concatenate()

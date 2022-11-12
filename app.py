@@ -33,6 +33,7 @@ app._favicon = (r"quantaq.ico")
 ### import df ###
 url = "https://media.githubusercontent.com/media/HylianWarrior1034/Quant-AQ-Dash/main/Quant-aq_2022.csv"
 df = pd.read_csv(url)
+all_sensors = df['module'].unique()
 # df = df[['timestamp', 'module', 'pm1', 'pm25', 'pm10']]
 
 # groupby each hour 
@@ -69,7 +70,7 @@ html.Div([
     html.Div([
         html.Div([
             html.Div([
-                dcc.Dropdown(df['module'].unique(), ['MOD-00021'], id='crossfilter-graph-module', multi = True)
+                dcc.Dropdown(value = ['MOD-00021'], id='crossfilter-graph-module', multi = True)
             ], className = 'pm-type'),
 
             html.Div([
@@ -78,10 +79,7 @@ html.Div([
                 ]),
 
                 html.Div([
-                    dcc.Checklist(options = [
-                        {'label': 'PM1', 'value': 'pm1'},
-                        {'label': 'PM2.5', 'value': 'pm25'},
-                        {'label': 'PM10', 'value': 'pm10'}], value = ['pm1'], id = 'particle-type', labelStyle = {'display': 'inline-block', 'marginTop': '5px', 'padding': '10px'})
+                    dcc.Checklist(id = 'particle-type', labelStyle = {'display': 'inline-block', 'marginTop': '5px', 'padding': '10px'})
                 ])
             ], className = 'radios', style = {'padding': '0px'}),
 
@@ -102,7 +100,7 @@ html.Div([
             ], className = 'downloader'),
 
             html.Div([
-                html.Button("Download Cleaned Data", id = "btn-download-csv", className = "downloader_btn"),
+                html.Button("Download Averaged Data", id = "btn-download-csv", className = "downloader_btn"),
                 dcc.Download(id="download-csv")
             ], className = 'downloader'),
 
@@ -135,8 +133,9 @@ html.Div([
     Input('datepicker', 'end_date'),
 )
 def store(modules, freq, types, start, end):
-    dff = df[types + ['timestamp', 'module']]
-    dff = dff.loc[dff['module'].isin(modules)]
+    dff = df.loc[df['module'].isin(modules)]
+
+    dff = dff.drop(['Unnamed: 0'], axis = 1)
 
     date_range = pd.date_range(start = start, end = end)
     date_range_list = date_range.strftime("%Y-%m-%d").tolist()
@@ -160,6 +159,19 @@ def store(modules, freq, types, start, end):
         dff = dff.loc[dff['timestamp'].isin(date_range_list)]
 
     return dff.to_json(orient = 'split')
+
+# Changes the option of sensors based on graph type chosen
+@app.callback(
+    Output("crossfilter-graph-module", "options"),
+    Input("crossfilter-graph-type", "value")
+)
+def sensor_options(graph_type): 
+    if graph_type == "PM Data":
+        return [{'label': i, 'value': i} for i in all_sensors]
+
+    if graph_type == 'Wind Data':
+        filtered = filter(lambda x: "PM" not in x, all_sensors)
+        return [{'label':i , 'value' :i} for i in filtered]
 
 # This is the download (raw files) button
 # The changed_input = ctx.triggered_id checks if the "download data" button was actually clicked
@@ -203,12 +215,57 @@ def download(n_clicks, dff_json):
         dff = dff.sort_values(['module', 'timestamp'], ascending = [True, True]).reset_index(drop = True)
         return dcc.send_data_frame(dff.to_csv, "customData.csv")
 
-    # return html.Div([
-    #     dcc.Markdown(
-    #         f'''You last clicked button with ID {button_clicked}
-    #         ''' if button_clicked else '''You haven't clicked any button yet''')
-    # ])
+# Changes the checkbox parameters based on graph types chosen
+@app.callback(
+    Output("particle-type", "options"),
+    Input("crossfilter-graph-type", "value"),
+    Input("particle-type", "value")
+)
+def select_particle_type(graph_type, value):
+    if graph_type == 'PM Data':
+        return [{'label': 'PM1', 'value': 'pm1'}, {'label': 'PM2.5', 'value': 'pm25'}, {'label': 'PM10', 'value': 'pm10'}]
 
+    if graph_type == 'Wind Data':
+        # This is only a function to limit the number of checked boxes on Wind Data to ONE ONLY 
+        options = [
+            {'label': 'PM1', 'value': 'pm1'}, 
+            {'label': 'PM2.5', 'value': 'pm25'}, 
+            {'label': 'PM10', 'value': 'pm10'}
+        ]
+        if len(value) >= 1:
+            options = [
+                {
+                    "label": option["label"],
+                    "value": option["value"],
+                    "disabled": option["value"] not in value,
+                }
+                for option in options
+            ]
+        
+        return options
+
+# This is only a function to limit the number of checked boxes on Wind Data to ONE ONLY 
+# @app.callback(
+#     Output("particle-type", "options"),
+#     Input("crossfilter-graph-type", "value"),
+#     Input("particle-type", "value")
+# )
+# def update_options(value):
+#     options = [{'label': 'PM1', 'value': 'pm1'}, 
+#     {'label': 'PM2.5', 'value': 'pm25'}, 
+#     {'label': 'PM10', 'value': 'pm10'}]
+
+#     if len(value) > 1:
+#         options = [
+#             {
+#                 "label": option["label"],
+#                 "value": option["value"],
+#                 "disabled": option["value"] not in value,
+#             }
+#             for option in options
+#         ]
+    
+#     return options
 
 # Dropdown: return "value", type: list, 
 # Checkbox: returns "value", type: list,
@@ -224,12 +281,19 @@ def download(n_clicks, dff_json):
     Input('crossfilter-graph-freq', 'value'),
     Input('particle-type', 'value'),
     Input('datepicker', 'start_date'),
-    Input('datepicker', 'end_date')
+    Input('datepicker', 'end_date'),
+    Input('crossfilter-graph-type', 'value')
 )
-def update_graph(df_json, modules, freq, types, start, end):
+def update_graph(df_json, modules, freq, types, start, end, graph_type):
     dff = pd.read_json(df_json, orient='split')
     print(dff.head())
     print(dff['module'].unique())
+
+    if graph_type == "PM Data":
+        dff = dff[types + ['timestamp', 'module']]
+
+    if graph_type == 'Wind Data':
+        dff = dff[types + ['timestamp', 'module', 'wind direction', 'wind speed']]
 
     figure_list = []
     # symbol list to distinguish the different particles 
@@ -264,9 +328,7 @@ def update_graph(df_json, modules, freq, types, start, end):
         types[index] = 'pm2.5'
 
     # add title to graph and makes the particle types all upper case
-    fig.update_layout(title = f"{', '.join([i.upper() for i in types])} Levels", xaxis_title = 'Date', yaxis_title = 'PM Levels', transition_duration=500)
-
-    # global_store(dff)
+    fig.update_layout(title = f"{', '.join([i.upper() for i in sorted(types)])} Levels", xaxis_title = 'Date', yaxis_title = 'PM Levels (μg/m³)', transition_duration=500)
         
     return fig
 

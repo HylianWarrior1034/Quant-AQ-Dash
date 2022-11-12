@@ -1,6 +1,7 @@
 body {
   background: rgba(128, 90, 70, 0.1725490196);
   overflow: hidden;
+  padding-left: 1.8vw;
 }
 
 .top {
